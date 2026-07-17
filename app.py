@@ -258,9 +258,9 @@ with st.sidebar:
     st.caption("ACI 318 — Rectangular Combined Footing")
 
     with st.expander("📋 Project Information", expanded=True):
-        project_name = st.text_input("Project Name", "Warehouse Foundation - Grid A-1/A-2")
-        engineer     = st.text_input("Engineer of Record", "J. Doe, P.E.")
-        date_str     = st.text_input("Date", "2025-01-15")
+        project_name = st.text_input("Project Name", "Basundhara Residential Area")
+        engineer     = st.text_input("Engineer of Record", "Md. Rakibul Hasan Mridha")
+        date_str     = st.text_input("Date", "2026-01-15")
         job_no       = st.text_input("Job No.", "CE-2025-014")
 
     with st.expander("🧱 Material Properties", expanded=True):
