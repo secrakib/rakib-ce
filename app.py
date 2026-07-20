@@ -4,7 +4,7 @@ Dual-Backend Integration:
   • Combined Rectangular Footing Design (ACI 318 — Textbook Ex. 16.3)
   • Single Column Square Spread Footing Design (ACI 318 — LRFD)
 
-Project Structure:
+Project Structure: 
   1.  Theme & CSS
   2.  Old Backend  (FootingInputs / FootingResults / design_footing)
   3.  New Backend  (SingleFootingInputs / SingleFootingResults / design_single_footing)
@@ -133,7 +133,18 @@ def design_footing(inp: FootingInputs) -> FootingResults:
 
     x_bar = (P_int_service * inp.L_cc) / P_total_service
     ext_face_to_center = (inp.col_ext_long / 2.0) / 12.0
+    
+    # textbook formula based on uniform bearing pressure
     L_required = 2 * (x_bar + ext_face_to_center)
+    
+    # --- AUTOMATIC GEOMETRICAL SAFEGUARD ---
+    # Calculates the boundary edge where the interior column ends
+    int_col_right_face = ext_face_to_center + inp.L_cc + (inp.col_int_long / 2.0) / 12.0
+    min_allowable_L = int_col_right_face + 1.0  # Forces a safe 1 ft minimum overhang clearance
+    
+    if L_required < min_allowable_L:
+        L_required = min_allowable_L
+
     L_actual = math.ceil(L_required * 4.0) / 4.0
     B_req = Area_req / L_actual
     B_actual = math.ceil(B_req * 4.0) / 4.0
@@ -475,12 +486,15 @@ def draw_combined_plan(R: FootingResults, I: FootingInputs):
                 arrowprops=dict(arrowstyle="<->", color=THEME["slate"], lw=1))
     ax.text(L_ft + 0.6, B_ft / 2, f"B = {B_ft:.2f} ft", rotation=90, va="center",
             fontsize=8.5, color=THEME["slate"])
-    ax.set_xlim(-1.5, L_ft + 1.8)
+    
+    # STABILIZED AXIS FRAME: Dynamic adjustment ensures viewport never clips any columns
+    max_frame_x = max(L_ft, int_cx + 3.0)
+    ax.set_xlim(-1.5, max_frame_x + 1.8)
     ax.set_ylim(-2.0, B_ft + 1.6)
     ax.set_aspect("equal")
     ax.axis("off")
     ax.set_title("Combined Footing — Plan View", fontsize=12, color=THEME["navy"],
-                 fontweight="bold", loc="left")
+                  fontweight="bold", loc="left")
     plt.tight_layout()
     return fig
 
@@ -884,7 +898,7 @@ with tab_dash:
 
 
 # ------------------------------------------------------------
-# OLD SYSTEM TAB
+# OLD SYSTEM TAB (Combined Footing)
 # ------------------------------------------------------------
 
 with tab_old:
@@ -1205,7 +1219,7 @@ with tab_old:
 
 
 # ------------------------------------------------------------
-# NEW SYSTEM TAB
+# NEW SYSTEM TAB (Single Footing)
 # ------------------------------------------------------------
 
 with tab_new:
